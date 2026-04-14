@@ -1,0 +1,243 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: engine-365-days
+  namespace: default
+  labels:
+    app: engine
+    engine: 365-days
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: engine
+      engine: 365-days
+  template:
+    metadata:
+      labels:
+        app: engine
+        engine: 365-days
+    spec:
+      containers:
+      - name: engine-365-days
+        image: node:24.2.0-slim
+        imagePullPolicy: IfNotPresent
+        command: ["node", "dist/index.js"]
+        ports:
+        - containerPort: 3000
+          name: http
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: engine-logs
+          mountPath: /app/logs
+        - name: engine-data
+          mountPath: /app/data
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        env:
+        - name: ENGINE_NAME
+          value: "engine-365-days"
+        - name: NODE_ENV
+          value: "production"
+        - name: LOG_LEVEL
+          value: "info"
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: engine-logs
+        persistentVolumeClaim:
+          claimName: engine-logs-pvc
+      - name: engine-data
+        persistentVolumeClaim:
+          claimName: engine-data-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ultimate-engine
+  namespace: default
+  labels:
+    app: engine
+    engine: ultimate
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: engine
+      engine: ultimate
+  template:
+    metadata:
+      labels:
+        app: engine
+        engine: ultimate
+    spec:
+      containers:
+      - name: ultimate-engine
+        image: node:24.2.0-slim
+        imagePullPolicy: IfNotPresent
+        command: ["node", "dist/index.js"]
+        ports:
+        - containerPort: 3001
+          name: http
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1000m"
+          limits:
+            memory: "1Gi"
+            cpu: "4000m"
+        volumeMounts:
+        - name: engine-logs
+          mountPath: /app/logs
+        - name: engine-data
+          mountPath: /app/data
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        env:
+        - name: ENGINE_NAME
+          value: "ultimate-engine"
+        - name: NODE_ENV
+          value: "production"
+        - name: LOG_LEVEL
+          value: "info"
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: engine-logs
+        persistentVolumeClaim:
+          claimName: engine-logs-pvc
+      - name: engine-data
+        persistentVolumeClaim:
+          claimName: engine-data-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tenetaiagency-101
+  namespace: default
+  labels:
+    app: engine
+    engine: tenet-101
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: engine
+      engine: tenet-101
+  template:
+    metadata:
+      labels:
+        app: engine
+        engine: tenet-101
+    spec:
+      containers:
+      - name: tenetaiagency-101
+        image: node:24.2.0-slim
+        imagePullPolicy: IfNotPresent
+        command: ["node", "dist/index.js"]
+        ports:
+        - containerPort: 3002
+          name: http
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: engine-logs
+          mountPath: /app/logs
+        - name: engine-data
+          mountPath: /app/data
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3002
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        env:
+        - name: ENGINE_NAME
+          value: "tenetaiagency-101"
+        - name: NODE_ENV
+          value: "production"
+        - name: LOG_LEVEL
+          value: "info"
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: engine-logs
+        persistentVolumeClaim:
+          claimName: engine-logs-pvc
+      - name: engine-data
+        persistentVolumeClaim:
+          claimName: engine-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: engine-service
+  namespace: default
+  labels:
+    app: engine
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: engine-365
+  - port: 8080
+    targetPort: 3001
+    protocol: TCP
+    name: ultimate
+  - port: 8443
+    targetPort: 3002
+    protocol: TCP
+    name: tenet
+  selector:
+    app: engine

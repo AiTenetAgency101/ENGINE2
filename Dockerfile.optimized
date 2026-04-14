@@ -1,0 +1,99 @@
+# Multi-stage optimized Dockerfile with DHI migration
+# Stage 1: Builder
+FROM node:24.2.0-slim AS builder
+WORKDIR /build
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production && npm cache clean --force
+COPY tsconfig.json .
+COPY src ./src
+RUN npm run build
+
+# Stage 2: Dependencies
+FROM builder AS dependencies
+RUN npm ci
+
+# Stage 3: K8s/Cloud Tools Layer
+FROM ubuntu:24.04-minimal AS tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    gnupg \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add Kubernetes repository
+RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+RUN echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
+
+# Add Google Cloud repository
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+
+# Install tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    kubectl \
+    google-cloud-cli \
+    google-cloud-cli-gke-gcloud-auth-plugin \
+    awscli \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Helm
+RUN curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# Stage 4: ATA Storage Integration
+FROM tools AS ata-storage
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    lvm2 \
+    smartmontools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Stage 5: DHI Production Image
+FROM docker.io/library/ubuntu:24.04 AS release
+LABEL maintainer="Ghostbox <backupsonbackupsrobby@gmail.com>"
+LABEL security="dhi-hardened"
+
+# Create non-root user
+RUN useradd -m -u 1000 -s /sbin/nologin appuser
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/* && apt-get clean
+
+# Copy Node.js runtime from official image
+COPY --from=node:24.2.0-slim /usr /usr
+COPY --from=node:24.2.0-slim /bin /bin
+
+# Copy compiled app and deps
+WORKDIR /app
+COPY --from=dependencies /build/node_modules ./node_modules
+COPY --from=builder /build/dist ./dist
+COPY --from=builder /build/package.json .
+
+# Copy K8s tools (minimal footprint)
+COPY --from=ata-storage /usr/bin/kubectl /usr/local/bin/
+COPY --from=ata-storage /usr/local/bin/helm /usr/local/bin/
+
+# Security hardening
+RUN chmod 755 /app && \
+    chown -R appuser:appuser /app && \
+    chmod 755 /usr/local/bin/kubectl && \
+    chmod 755 /usr/local/bin/helm
+
+# Set environment
+ENV NODE_ENV=production \
+    NODE_OPTIONS="--max-old-space-size=512 --enable-source-maps" \
+    PATH="/app/node_modules/.bin:${PATH}"
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+
+# Switch to non-root user
+USER appuser
+
+# Expose standard ports
+EXPOSE 3000 8080
+
+# Run application
+CMD ["node", "dist/index.js"]

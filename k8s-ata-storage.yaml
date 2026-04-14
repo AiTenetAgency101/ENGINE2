@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: StorageClass
+metadata:
+  name: ata-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: engine-logs-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ata-storage
+  hostPath:
+    path: /mnt/ata/engine-logs
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: engine-data-pv
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ata-storage
+  hostPath:
+    path: /mnt/ata/engine-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: engine-logs-pvc
+  namespace: default
+spec:
+  storageClassName: ata-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: engine-data-pvc
+  namespace: default
+spec:
+  storageClassName: ata-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Gi

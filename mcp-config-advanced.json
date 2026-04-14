@@ -1,0 +1,72 @@
+{
+  "$schema": "https://schemas.modelcontextprotocol.io/json/core/2024-11-05/schema.json",
+  "mcpServers": {
+    "kubernetes-mcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "${HOME}/.kube:/root/.kube:ro",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "-e",
+        "KUBECONFIG=/root/.kube/config",
+        "mcp/kubernetes:latest"
+      ],
+      "disabled": false,
+      "description": "Kubernetes cluster management via MCP"
+    },
+    "engine-manager": {
+      "command": "python3",
+      "args": [
+        "mcp_engine_manager.py"
+      ],
+      "env": {
+        "DOCKER_SOCKET": "/var/run/docker.sock",
+        "KAGGLE_USERNAME": "backupsonbackupsrobby-cyber",
+        "KAGGLE_KEY": "${KAGGLE_API_TOKEN}"
+      },
+      "disabled": false,
+      "description": "ENGINE v1.0.0 management and monitoring"
+    }
+  },
+  "tools": {
+    "engine_status": {
+      "type": "built-in",
+      "description": "Get real-time status of all 3 engines",
+      "alwaysAllow": true
+    },
+    "engine_logs": {
+      "type": "built-in",
+      "description": "Retrieve engine logs with filtering",
+      "alwaysAllow": true
+    },
+    "consensus_check": {
+      "type": "built-in",
+      "description": "Verify Byzantine consensus across engines",
+      "alwaysAllow": true
+    },
+    "kaggle_list_competitions": {
+      "type": "built-in",
+      "description": "List active Kaggle competitions",
+      "alwaysAllow": true
+    },
+    "kaggle_submit": {
+      "type": "built-in",
+      "description": "Submit predictions to Kaggle",
+      "alwaysAllow": true
+    },
+    "k8s_deploy": {
+      "type": "built-in",
+      "description": "Deploy engines to Kubernetes",
+      "alwaysAllow": true
+    },
+    "docker_compose_up": {
+      "type": "built-in",
+      "description": "Start full stack locally",
+      "alwaysAllow": true
+    }
+  }
+}
