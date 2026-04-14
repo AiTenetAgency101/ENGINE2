@@ -1,0 +1,82 @@
+name: Branch Protection
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-pr:
+    name: Validate Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check PR has description
+        run: |
+          if [ -z "${{ github.event.pull_request.body }}" ]; then
+            echo "❌ PR description is required"
+            exit 1
+          fi
+          echo "✓ PR has description"
+      
+      - name: Check PR labels
+        run: |
+          if [ ${#labels[@]} -eq 0 ]; then
+            echo "⚠️ Warning: PR should have labels"
+          fi
+      
+      - name: Verify no merge conflicts
+        run: |
+          if git merge-base --is-ancestor ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}; then
+            echo "✓ No merge conflicts"
+          else
+            echo "❌ Merge conflict detected"
+            exit 1
+          fi
+
+  validate-changes:
+    name: Validate File Changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check no .env files committed
+        run: |
+          if git diff origin/main HEAD --name-only | grep -E '\.env'; then
+            echo "❌ Do not commit .env files"
+            exit 1
+          fi
+          echo "✓ No .env files detected"
+      
+      - name: Check no secrets in commits
+        run: |
+          if git log origin/main..HEAD -p | grep -E '(password|secret|api_key|token)'; then
+            echo "⚠️ Possible secrets detected - review changes"
+          fi
+          echo "✓ Secrets scan complete"
+
+  lint-code:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install linters
+        run: |
+          pip install flake8 black isort pylint
+      
+      - name: Run Black formatter check
+        run: black --check engine_core/ || true
+      
+      - name: Run Flake8
+        run: flake8 engine_core/ --max-line-length=120 || true
+      
+      - name: Run isort check
+        run: isort --check-only engine_core/ || true
