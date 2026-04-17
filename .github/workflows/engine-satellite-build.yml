@@ -1,4 +1,4 @@
-name: ENGINE - Satellite Verified Build
+﻿name: ENGINE - Satellite Verified Build
 
 on:
   push:
@@ -13,7 +13,9 @@ permissions:
 
 jobs:
   verify-and-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
       - uses: actions/checkout@v4
@@ -36,19 +38,19 @@ jobs:
           echo "======================================"
           echo ""
           echo "Checking security files..."
-          ls -lh secure-credentials.sh 2>/dev/null && echo "✓ secure-credentials.sh" || echo "⚠ secure-credentials.sh not found"
-          ls -lh satellite-state-verification.sh 2>/dev/null && echo "✓ satellite-state-verification.sh" || echo "⚠ satellite-state-verification.sh not found"
-          ls -lh integrate-aifactori.sh 2>/dev/null && echo "✓ integrate-aifactori.sh" || echo "⚠ integrate-aifactori.sh not found"
+          ls -lh secure-credentials.sh 2>/dev/null && echo "âœ“ secure-credentials.sh" || echo "âš  secure-credentials.sh not found"
+          ls -lh satellite-state-verification.sh 2>/dev/null && echo "âœ“ satellite-state-verification.sh" || echo "âš  satellite-state-verification.sh not found"
+          ls -lh integrate-aifactori.sh 2>/dev/null && echo "âœ“ integrate-aifactori.sh" || echo "âš  integrate-aifactori.sh not found"
           echo ""
           echo "Checking directories..."
-          ls -ld .secrets 2>/dev/null && echo "✓ .secrets/" || echo "⚠ .secrets/ not found"
-          ls -ld .satellite-state 2>/dev/null && echo "✓ .satellite-state/" || echo "⚠ .satellite-state/ not found"
-          ls -ld .github/workflows 2>/dev/null && echo "✓ .github/workflows/" || echo "⚠ .github/workflows/ not found"
+          ls -ld .secrets 2>/dev/null && echo "âœ“ .secrets/" || echo "âš  .secrets/ not found"
+          ls -ld .satellite-state 2>/dev/null && echo "âœ“ .satellite-state/" || echo "âš  .satellite-state/ not found"
+          ls -ld .github/workflows 2>/dev/null && echo "âœ“ .github/workflows/" || echo "âš  .github/workflows/ not found"
           echo ""
           echo "Checking documentation..."
-          ls -lh README.md 2>/dev/null && echo "✓ README.md" || echo "⚠ README.md not found"
-          ls -lh SECURITY.md 2>/dev/null && echo "✓ SECURITY.md" || echo "⚠ SECURITY.md not found"
-          ls -lh START_HERE.md 2>/dev/null && echo "✓ START_HERE.md" || echo "⚠ START_HERE.md not found"
+          ls -lh README.md 2>/dev/null && echo "âœ“ README.md" || echo "âš  README.md not found"
+          ls -lh SECURITY.md 2>/dev/null && echo "âœ“ SECURITY.md" || echo "âš  SECURITY.md not found"
+          ls -lh START_HERE.md 2>/dev/null && echo "âœ“ START_HERE.md" || echo "âš  START_HERE.md not found"
           echo ""
           echo "File summary:"
           echo "  Scripts: $(ls -1 *.sh 2>/dev/null | wc -l) shell scripts"
@@ -61,12 +63,12 @@ jobs:
         run: |
           echo "Docker Compose Configuration:"
           if [ -f docker-compose.yml ]; then
-            echo "✓ docker-compose.yml found"
+            echo "âœ“ docker-compose.yml found"
             echo ""
             echo "Services configured:"
             grep "image:\|container_name:" docker-compose.yml | head -10
           else
-            echo "⚠ docker-compose.yml not found"
+            echo "âš  docker-compose.yml not found"
           fi
       
       - name: Build Docker Images
@@ -90,21 +92,21 @@ jobs:
         if: always()
         run: |
           echo ""
-          echo "╔════════════════════════════════════════╗"
-          echo "║     ENGINE BUILD STATUS - SUCCESS      ║"
-          echo "╚════════════════════════════════════════╝"
+          echo "â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—"
+          echo "â•‘     ENGINE BUILD STATUS - SUCCESS      â•‘"
+          echo "â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"
           echo ""
-          echo "✅ Repository verified"
-          echo "✅ Security files present"
-          echo "✅ Documentation complete"
-          echo "✅ Docker configured"
-          echo "✅ Build pipeline ready"
+          echo "âœ… Repository verified"
+          echo "âœ… Security files present"
+          echo "âœ… Documentation complete"
+          echo "âœ… Docker configured"
+          echo "âœ… Build pipeline ready"
           echo ""
           echo "Security Status:"
-          echo "  • Credentials: 8-layer protection"
-          echo "  • State: Satellite-verified (5-layer)"
-          echo "  • Containers: Secure & healthy"
-          echo "  • CVEs: Scanned & monitored"
+          echo "  â€¢ Credentials: 8-layer protection"
+          echo "  â€¢ State: Satellite-verified (5-layer)"
+          echo "  â€¢ Containers: Secure & healthy"
+          echo "  â€¢ CVEs: Scanned & monitored"
           echo ""
           echo "======================================"
           echo "LOCAL VERIFICATION (run locally):"
@@ -122,3 +124,4 @@ jobs:
           echo "  docker ps"
           echo ""
           echo "======================================"
+

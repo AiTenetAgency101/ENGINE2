@@ -11,6 +11,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
@@ -48,3 +50,4 @@ jobs:
           chmod +x ./scripts/health/k8s-deploy-orchestrator.sh
           ./scripts/health/k8s-deploy-orchestrator.sh
         shell: bash
+

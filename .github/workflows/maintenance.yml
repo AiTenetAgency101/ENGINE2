@@ -1,4 +1,4 @@
-name: ENGINE Weekly Maintenance
+﻿name: ENGINE Weekly Maintenance
 
 on:
   schedule:
@@ -7,7 +7,9 @@ on:
 
 jobs:
   maintenance:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
       - uses: actions/checkout@v4
@@ -37,13 +39,13 @@ jobs:
         run: |
           echo "Checking for security updates..."
           # Run Dependabot checks
-          echo "✓ Dependency check complete"
+          echo "âœ“ Dependency check complete"
       
       - name: Verify SSL certificates
         run: |
           echo "Verifying SSL certificate expiration..."
           # Check certificate expiration dates
-          echo "✓ Certificate check complete"
+          echo "âœ“ Certificate check complete"
       
       - name: Generate maintenance report
         run: |
@@ -88,3 +90,4 @@ jobs:
           git add -A
           git commit -m "Weekly maintenance completed" || true
           git push || true
+

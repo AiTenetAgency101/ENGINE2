@@ -1,4 +1,4 @@
-name: Production Deployment Pipeline
+﻿name: Production Deployment Pipeline
 
 on:
   push:
@@ -27,7 +27,9 @@ jobs:
   # =================================================================
   security-scan:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     strategy:
       matrix:
         service: 
@@ -62,7 +64,9 @@ jobs:
   # =================================================================
   lint-and-test:
     name: Lint & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     strategy:
       matrix:
         include:
@@ -136,7 +140,9 @@ jobs:
   build:
     name: Build Docker Images
     needs: [security-scan, lint-and-test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     strategy:
       matrix:
         service:
@@ -187,7 +193,9 @@ jobs:
   validate-k8s:
     name: Validate Kubernetes Manifests
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v4
@@ -198,7 +206,7 @@ jobs:
       - name: Validate Kubernetes manifests
         run: |
           kubectl apply -f k8s/ --dry-run=client --validate=true
-          echo "✅ Kubernetes manifests validated successfully"
+          echo "âœ… Kubernetes manifests validated successfully"
 
       - name: Check for required fields
         run: |
@@ -213,7 +221,9 @@ jobs:
   deploy-compose:
     name: Deploy to Docker Compose (Staging)
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: staging
@@ -232,14 +242,14 @@ jobs:
           elapsed=0
           while [ $elapsed -lt $timeout ]; do
             if docker-compose -f docker-compose-production.yml ps | grep -E "unhealthy|Exited"; then
-              echo "❌ Service is unhealthy"
+              echo "âŒ Service is unhealthy"
               docker-compose -f docker-compose-production.yml ps
               exit 1
             fi
             sleep 10
             elapsed=$((elapsed + 10))
           done
-          echo "✅ All services healthy"
+          echo "âœ… All services healthy"
 
       - name: Run smoke tests
         run: |
@@ -255,7 +265,7 @@ jobs:
           echo "Testing restricted-aichatbot-trader (5000)..."
           curl -f http://localhost:5000/health || exit 1
           
-          echo "✅ All smoke tests passed"
+          echo "âœ… All smoke tests passed"
 
       - name: Collect logs on failure
         if: failure()
@@ -269,7 +279,9 @@ jobs:
   deploy-k8s:
     name: Deploy to Kubernetes (Production)
     needs: [validate-k8s, deploy-compose]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: production
@@ -337,7 +349,7 @@ jobs:
         run: |
           echo "Testing Kubernetes services..."
           kubectl run test-pod --image=curlimages/curl -n engine --rm -i --restart=Never -- curl http://tenetaiagency-101:8000/health
-          echo "✅ Kubernetes deployment verified"
+          echo "âœ… Kubernetes deployment verified"
 
       - name: Create deployment record
         if: success()
@@ -354,13 +366,13 @@ jobs:
         with:
           payload: |
             {
-              "text": "✅ ENGINE Production Deployment Successful",
+              "text": "âœ… ENGINE Production Deployment Successful",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*ENGINE Production Deployment*\n*Status:* ✅ Success\n*Commit:* ${{ github.sha }}\n*Branch:* ${{ github.ref }}"
+                    "text": "*ENGINE Production Deployment*\n*Status:* âœ… Success\n*Commit:* ${{ github.sha }}\n*Branch:* ${{ github.ref }}"
                   }
                 }
               ]
@@ -374,7 +386,9 @@ jobs:
   health-check:
     name: Health Check & Monitoring Setup
     needs: deploy-k8s
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
@@ -411,7 +425,7 @@ jobs:
           ## Summary
           - Commit: ${{ github.sha }}
           - Timestamp: $(date)
-          - Status: ✅ LIVE
+          - Status: âœ… LIVE
           
           ## Services Deployed
           - tenetaiagency-101 (Python) - Port 8000
@@ -439,3 +453,4 @@ jobs:
         with:
           name: deployment-report
           path: deployment-report.md
+

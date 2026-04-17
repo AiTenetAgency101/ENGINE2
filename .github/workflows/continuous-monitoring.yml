@@ -1,4 +1,4 @@
-name: Automated Health Monitoring
+﻿name: Automated Health Monitoring
 
 on:
   push:
@@ -9,7 +9,9 @@ on:
 
 jobs:
   continuous-health-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     continue-on-error: true
     
     steps:
@@ -44,7 +46,7 @@ jobs:
           
           for endpoint in "${endpoints[@]}"; do
             echo "Testing: $endpoint"
-            curl -f -s "$endpoint" > /dev/null && echo "✓ OK" || echo "~ Queued"
+            curl -f -s "$endpoint" > /dev/null && echo "âœ“ OK" || echo "~ Queued"
           done
       
       - name: Generate health report
@@ -59,22 +61,22 @@ jobs:
           
           | Service | Status | Port | Health |
           |---------|--------|------|--------|
-          | tenetaiagency-101 | Running | 8000 | ✓ Healthy |
-          | engine-365-days | Running | 8080 | ✓ Healthy |
-          | restricted-aichatbot-trader | Running | 5000 | ✓ Healthy |
+          | tenetaiagency-101 | Running | 8000 | âœ“ Healthy |
+          | engine-365-days | Running | 8080 | âœ“ Healthy |
+          | restricted-aichatbot-trader | Running | 5000 | âœ“ Healthy |
           | ultimate-engine | Initializing | 3000 | ~ Starting |
-          | Kubernetes Cluster | Operational | 6443 | ✓ Healthy |
+          | Kubernetes Cluster | Operational | 6443 | âœ“ Healthy |
           
           ## Infrastructure
           
           | Component | Status | Health |
           |-----------|--------|--------|
-          | PostgreSQL | Deploying | 🔄 |
-          | Redis | Deploying | 🔄 |
-          | Prometheus | Deploying | 🔄 |
-          | Grafana | Deploying | 🔄 |
-          | Jaeger | Deploying | 🔄 |
-          | AlertManager | Deploying | 🔄 |
+          | PostgreSQL | Deploying | ðŸ”„ |
+          | Redis | Deploying | ðŸ”„ |
+          | Prometheus | Deploying | ðŸ”„ |
+          | Grafana | Deploying | ðŸ”„ |
+          | Jaeger | Deploying | ðŸ”„ |
+          | AlertManager | Deploying | ðŸ”„ |
           
           ## Metrics
           
@@ -86,11 +88,11 @@ jobs:
           
           ## Actions
           
-          - ✅ Security scanning: Active
-          - ✅ Health monitoring: Continuous
-          - ✅ Auto-remediation: Enabled
-          - ✅ Backup procedures: Configured
-          - ✅ Maintenance scripts: Scheduled
+          - âœ… Security scanning: Active
+          - âœ… Health monitoring: Continuous
+          - âœ… Auto-remediation: Enabled
+          - âœ… Backup procedures: Configured
+          - âœ… Maintenance scripts: Scheduled
           
           ## Next Steps
           
@@ -100,7 +102,7 @@ jobs:
           4. Health checks run every 5 minutes
           5. Weekly maintenance scheduled
           
-          **Status: ✅ FULLY OPERATIONAL**
+          **Status: âœ… FULLY OPERATIONAL**
           EOF
       
       - name: Upload health report
@@ -115,3 +117,4 @@ jobs:
           cp HEALTH_STATUS.md docs/index.md
           echo "# ENGINE Health Dashboard" > docs/README.md
           echo "See index.md for latest status" >> docs/README.md
+

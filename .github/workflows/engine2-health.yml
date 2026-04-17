@@ -11,6 +11,8 @@ on:
 jobs:
   health:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
@@ -40,3 +42,4 @@ jobs:
           echo "=== CLUSTER B: ENGINE2 PODS ==="
           kubectl get pods -A | grep -i engine2 || true
         shell: bash
+
