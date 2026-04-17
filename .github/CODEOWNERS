@@ -1,0 +1,20 @@
+# ENGINE System Code Owners
+# This file defines ownership of critical system components
+
+# All files default
+* @backupsonbackupsrobby-cyber
+
+# Core engine subsystems - require approval
+/engine_core/ @backupsonbackupsrobby-cyber
+/engine_core/ehf_*.py @backupsonbackupsrobby-cyber
+/engine_core/zha_*.py @backupsonbackupsrobby-cyber
+/engine_core/tron_*.py @backupsonbackupsrobby-cyber
+
+# Infrastructure and deployment
+/docker-compose-production.yml @backupsonbackupsrobby-cyber
+/k8s/ @backupsonbackupsrobby-cyber
+/.github/workflows/ @backupsonbackupsrobby-cyber
+
+# Security and monitoring
+/.github/ @backupsonbackupsrobby-cyber
+/monitoring/ @backupsonbackupsrobby-cyber

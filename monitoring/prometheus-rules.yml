@@ -1,0 +1,230 @@
+groups:
+  - name: engine_alerts
+    interval: 30s
+    rules:
+      # Container availability
+      - alert: ContainerDown
+        expr: up{job=~".*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          tier: application
+        annotations:
+          summary: "Container {{ $labels.job }} is down"
+          description: "Container {{ $labels.instance }} has been down for more than 2 minutes"
+
+      # Service health
+      - alert: ServiceUnhealthy
+        expr: up{service=~"api|database|cache"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          tier: application
+        annotations:
+          summary: "Service {{ $labels.service }} is unhealthy"
+          description: "{{ $labels.container_name }} failed health check"
+
+      # Database issues
+      - alert: PostgresConnectionLimit
+        expr: pg_stat_activity_count > 180
+        for: 5m
+        labels:
+          severity: warning
+          tier: database
+        annotations:
+          summary: "PostgreSQL approaching connection limit"
+          description: "{{ $value }} connections active (limit: 200)"
+
+      - alert: PostgresSlowQueries
+        expr: pg_slow_queries_total > 100
+        for: 10m
+        labels:
+          severity: warning
+          tier: database
+        annotations:
+          summary: "PostgreSQL experiencing slow queries"
+          description: "{{ $value }} slow queries detected in last 10 minutes"
+
+      # Redis issues
+      - alert: RedisMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          tier: cache
+        annotations:
+          summary: "Redis memory usage critical"
+          description: "Redis memory at {{ $value | humanizePercentage }} of limit"
+
+      - alert: RedisEvictions
+        expr: increase(redis_evicted_keys_total[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          tier: cache
+        annotations:
+          summary: "Redis experiencing high eviction rate"
+          description: "{{ $value }} keys evicted in last 5 minutes"
+
+      # CPU/Memory pressure
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+          tier: infrastructure
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage at {{ $value | humanize }}%"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          tier: infrastructure
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage at {{ $value | humanize }}%"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs|squashfs|vfat"} / node_filesystem_size_bytes) < 0.15
+        for: 10m
+        labels:
+          severity: warning
+          tier: infrastructure
+        annotations:
+          summary: "Low disk space on {{ $labels.device }}"
+          description: "{{ $value | humanizePercentage }} free space remaining"
+
+      # Network issues
+      - alert: HighNetworkErrorRate
+        expr: rate(node_network_transmit_errs_total[5m]) > 100 OR rate(node_network_receive_errs_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          tier: infrastructure
+        annotations:
+          summary: "High network error rate on {{ $labels.device }}"
+          description: "{{ $value | humanize }} errors/sec"
+
+      # Prometheus issues
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          tier: monitoring
+        annotations:
+          summary: "Prometheus is down"
+          description: "Prometheus has been unavailable for more than 1 minute"
+
+      - alert: PrometheusHighMemoryUsage
+        expr: process_resident_memory_bytes{job="prometheus"} / (1024*1024*1024) > 2
+        for: 10m
+        labels:
+          severity: warning
+          tier: monitoring
+        annotations:
+          summary: "Prometheus memory usage high"
+          description: "Prometheus using {{ $value | humanize }}GB memory"
+
+      # Vault issues
+      - alert: VaultSealed
+        expr: vault_core_unsealed == 0
+        for: 1m
+        labels:
+          severity: critical
+          tier: security
+        annotations:
+          summary: "Vault is sealed"
+          description: "Vault has been sealed and needs unsealing"
+
+      # Jaeger issues
+      - alert: JaegerHighLatency
+        expr: histogram_quantile(0.95, rate(jaeger_query_latency[5m])) > 5000
+        for: 10m
+        labels:
+          severity: warning
+          tier: observability
+        annotations:
+          summary: "Jaeger query latency high"
+          description: "p95 latency at {{ $value | humanize }}ms"
+
+      # Application response time
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~"tenetai|ultimate|engine365|trader"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          tier: application
+        annotations:
+          summary: "High API latency on {{ $labels.job }}"
+          description: "p95 response time at {{ $value | humanize }}s"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          tier: application
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "Error rate at {{ $value | humanizePercentage }}"
+
+      # Dependency health
+      - alert: DatabaseConnectionPoolExhausted
+        expr: db_connection_pool_available < 5
+        for: 2m
+        labels:
+          severity: critical
+          tier: application
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "{{ $value }} connections remaining in pool"
+
+      - alert: CacheConnectionLost
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          tier: application
+        annotations:
+          summary: "Cache connection lost"
+          description: "Cannot connect to Redis"
+
+  - name: slo_alerts
+    interval: 1m
+    rules:
+      # SLO: 99.9% availability
+      - alert: SLOViolation_Availability
+        expr: up{job=~"tenetai|ultimate|engine365|trader"} < 0.999
+        for: 5m
+        labels:
+          severity: critical
+          slo: "availability"
+        annotations:
+          summary: "SLO violation: Availability"
+          description: "{{ $labels.service }} availability below 99.9% target"
+
+      # SLO: p95 latency < 2s
+      - alert: SLOViolation_Latency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 10m
+        labels:
+          severity: warning
+          slo: "latency"
+        annotations:
+          summary: "SLO violation: Latency"
+          description: "p95 latency above 2s target"
+
+      # SLO: Error rate < 0.1%
+      - alert: SLOViolation_ErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.001
+        for: 5m
+        labels:
+          severity: warning
+          slo: "error_rate"
+        annotations:
+          summary: "SLO violation: Error rate"
+          description: "Error rate above 0.1% target"

@@ -1,0 +1,32 @@
+# ENGINE - XYO Three Invariants Integration
+# Requirements for container health synchronization
+
+# Core ENGINE
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# XYO Integration
+sympy>=1.12          # Symbolic math for health synchronization
+requests>=2.31.0     # XYO API calls
+
+# Container Management
+docker>=6.0.0
+docker-compose>=2.0.0
+
+# Security & Cryptography
+cryptography>=41.0.0
+pycryptodome>=3.18.0
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0
+
+# AI/ML (optional)
+tensorflow>=2.13.0   # For ML-based health prediction
+scikit-learn>=1.3.0  # For clustering container states
+
+# Development
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.7.0
+flake8>=6.0.0

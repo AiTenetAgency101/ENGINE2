@@ -1,0 +1,119 @@
+global:
+  resolve_timeout: 5m
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+route:
+  receiver: 'default'
+  group_by: ['severity', 'service', 'alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+
+  routes:
+    # Critical production alerts
+    - match:
+        severity: 'critical'
+      receiver: 'critical-pagerduty'
+      continue: true
+      group_wait: 10s
+      repeat_interval: 30m
+
+    # SLO violations
+    - match:
+        slo: '.*'
+      receiver: 'slo-alerts'
+      continue: true
+      group_wait: 1m
+
+    # Database alerts
+    - match_re:
+        tier: 'database|cache'
+      receiver: 'database-team'
+      continue: true
+
+    # Application errors
+    - match_re:
+        tier: 'application'
+      receiver: 'app-team'
+      group_wait: 1m
+
+    # Infrastructure alerts
+    - match_re:
+        tier: 'infrastructure'
+      receiver: 'ops-team'
+      group_wait: 2m
+
+receivers:
+  - name: 'default'
+    slack_configs:
+      - channel: '#engine-alerts'
+        title: 'ENGINE Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}'
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+
+  - name: 'critical-pagerduty'
+    slack_configs:
+      - channel: '#engine-critical'
+        title: '🚨 CRITICAL: ENGINE INCIDENT'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}'
+        send_resolved: true
+        color: 'danger'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        description: '{{ .GroupLabels.alertname }}: {{ .Alerts.Firing | len }} firing'
+
+  - name: 'slo-alerts'
+    slack_configs:
+      - channel: '#engine-slo'
+        title: '⚠️ SLO Violation'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}'
+        send_resolved: true
+        color: 'warning'
+
+  - name: 'database-team'
+    slack_configs:
+      - channel: '#engine-database'
+        title: 'Database Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}'
+
+  - name: 'app-team'
+    slack_configs:
+      - channel: '#engine-app-errors'
+        title: 'Application Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}'
+
+  - name: 'ops-team'
+    slack_configs:
+      - channel: '#engine-infrastructure'
+        title: 'Infrastructure Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}'
+
+inhibit_rules:
+  # Don't alert on pod errors if the node is down
+  - source_match:
+      severity: 'critical'
+      alertname: 'NodeDown'
+    target_match_re:
+      severity: 'warning|info'
+    equal: ['instance']
+
+  # Don't alert on slow queries if database is down
+  - source_match:
+      severity: 'critical'
+      alertname: 'PostgresDown'
+    target_match:
+      alertname: 'PostgresSlowQueries'
+    equal: ['instance']
+
+  # Don't alert on cache issues if cache is down
+  - source_match:
+      severity: 'critical'
+      alertname: 'RedisDown'
+    target_match_re:
+      alertname: 'Redis.*'
+    equal: ['instance']

@@ -1,0 +1,119 @@
+version: '3.9'
+
+services:
+  engine-365-days:
+    container_name: engine-365-days
+    image: node:24.2.0-slim
+    command: node dist/index.js
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - engine-logs:/app/logs
+      - engine-data:/app/data
+      - ./dist:/app/dist:ro
+      - ./package.json:/app/package.json:ro
+    environment:
+      NODE_ENV: production
+      ENGINE_NAME: engine-365-days
+      LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    mem_limit: 512m
+    cpus: '2'
+    networks:
+      - engine-network
+
+  ultimate-engine:
+    container_name: ultimate-engine
+    image: node:24.2.0-slim
+    command: node dist/index.js
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - ultimate-logs:/app/logs
+      - engine-data:/app/data
+      - ./dist:/app/dist:ro
+      - ./package.json:/app/package.json:ro
+    environment:
+      NODE_ENV: production
+      ENGINE_NAME: ultimate-engine
+      LOG_LEVEL: info
+      PORT: '3001'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    mem_limit: 1g
+    cpus: '4'
+    networks:
+      - engine-network
+
+  tenetaiagency-101:
+    container_name: tenetaiagency-101
+    image: node:24.2.0-slim
+    command: node dist/index.js
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    volumes:
+      - tenet-logs:/app/logs
+      - engine-data:/app/data
+      - ./dist:/app/dist:ro
+      - ./package.json:/app/package.json:ro
+    environment:
+      NODE_ENV: production
+      ENGINE_NAME: tenetaiagency-101
+      LOG_LEVEL: info
+      PORT: '3002'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    mem_limit: 512m
+    cpus: '2'
+    networks:
+      - engine-network
+
+  kaggle-submission:
+    container_name: kaggle-submission
+    image: python:3.12-slim
+    command: python kaggle_submission_pipeline.py
+    restart: on-failure
+    volumes:
+      - ./kaggle_submission_pipeline.py:/app/kaggle_submission_pipeline.py:ro
+      - kaggle-data:/app/kaggle_submissions
+    environment:
+      KAGGLE_USERNAME: backupsonbackupsrobby-cyber
+      KAGGLE_KEY: ${KAGGLE_KEY}
+    depends_on:
+      - engine-365-days
+      - ultimate-engine
+      - tenetaiagency-101
+    networks:
+      - engine-network
+
+volumes:
+  engine-logs:
+    driver: local
+  ultimate-logs:
+    driver: local
+  tenet-logs:
+    driver: local
+  engine-data:
+    driver: local
+  kaggle-data:
+    driver: local
+
+networks:
+  engine-network:
+    driver: bridge

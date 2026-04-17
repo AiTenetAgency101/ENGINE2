@@ -1,0 +1,45 @@
+{
+  "mcpServers": {
+    "kubernetes": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "/root/.kube:/root/.kube",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "mcp/kubernetes:latest"
+      ],
+      "env": {
+        "KUBECONFIG": "/root/.kube/config"
+      }
+    },
+    "docker": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "-v",
+        "/root/.docker:/root/.docker",
+        "mcp/docker:latest"
+      ]
+    },
+    "engine-manager": {
+      "command": "python",
+      "args": [
+        "-m",
+        "mcp_engine_manager"
+      ],
+      "env": {
+        "DOCKER_SOCKET": "/var/run/docker.sock",
+        "KAGGLE_USERNAME": "backupsonbackupsrobby-cyber",
+        "KAGGLE_KEY": "${KAGGLE_API_TOKEN}"
+      }
+    }
+  }
+}
