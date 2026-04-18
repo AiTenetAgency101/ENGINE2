@@ -1,0 +1,11 @@
+﻿{
+  "anchor": "FORTRESS-4",
+  "type": "operational_risk",
+  "schema_version": "1.0.0",
+  "fields": {
+    "service": "anchor",
+    "risk_score": null,
+    "blast_radius": null,
+    "failure_vector": "anchor"
+  }
+}

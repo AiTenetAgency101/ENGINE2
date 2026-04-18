@@ -1,0 +1,11 @@
+﻿{
+  "anchor": "AURORA-1",
+  "type": "signal_intelligence",
+  "schema_version": "1.0.0",
+  "fields": {
+    "temperature": null,
+    "uptime_wave": null,
+    "thermal_drift": null,
+    "restart_signature": null
+  }
+}

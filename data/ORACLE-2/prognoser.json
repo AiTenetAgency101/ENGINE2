@@ -1,0 +1,12 @@
+﻿{
+  "anchor": "ORACLE-2",
+  "type": "predictive_probability",
+  "schema_version": "1.0.0",
+  "fields": {
+    "drift": null,
+    "entropy": null,
+    "momentum": null,
+    "variance": null,
+    "implied_probability": null
+  }
+}

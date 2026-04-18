@@ -1,0 +1,11 @@
+﻿{
+  "anchor": "PRISM-6",
+  "type": "identity_registry",
+  "schema_version": "1.0.0",
+  "fields": {
+    "agent_id": "anchor",
+    "role": "anchor",
+    "capacity": null,
+    "health": "unknown"
+  }
+}

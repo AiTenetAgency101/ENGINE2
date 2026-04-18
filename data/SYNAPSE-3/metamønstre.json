@@ -1,0 +1,11 @@
+﻿{
+  "anchor": "SYNAPSE-3",
+  "type": "emergent_patterns",
+  "schema_version": "1.0.0",
+  "fields": {
+    "pattern_id": "anchor",
+    "correlation_strength": null,
+    "recursion_depth": null,
+    "signature": "anchor"
+  }
+}

@@ -1,0 +1,11 @@
+﻿{
+  "anchor": "ATLAS-5",
+  "type": "knowledge_consistency",
+  "schema_version": "1.0.0",
+  "fields": {
+    "belief": "anchor",
+    "confidence": null,
+    "contradictions": [],
+    "derivation_chain": []
+  }
+}
