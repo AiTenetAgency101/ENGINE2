@@ -74,7 +74,11 @@ def test_recommendations_include_contextual_guidance_and_optimal_fallback(monkey
         energy_level=40,
         glucose_level=150,
     )
-    monkeypatch.setattr(engine.circadian, "get_circadian_phase", lambda: CircadianPhase.POST_LUNCH_DIP)
+    monkeypatch.setattr(
+        engine.circadian,
+        "get_circadian_phase",
+        lambda *args, **kwargs: CircadianPhase.POST_LUNCH_DIP,
+    )
 
     recommendations = engine.get_recommendations()
 
@@ -87,7 +91,11 @@ def test_recommendations_include_contextual_guidance_and_optimal_fallback(monkey
 
     optimal_engine = EHFFrequencyEngine()
     optimal_engine.current_metrics = BioMetrics()
-    monkeypatch.setattr(optimal_engine.circadian, "get_circadian_phase", lambda: CircadianPhase.WAKE_UP)
+    monkeypatch.setattr(
+        optimal_engine.circadian,
+        "get_circadian_phase",
+        lambda *args, **kwargs: CircadianPhase.WAKE_UP,
+    )
 
     assert optimal_engine.get_recommendations() == ["✅ Optimal conditions - maintain current state"]
 
@@ -95,7 +103,11 @@ def test_recommendations_include_contextual_guidance_and_optimal_fallback(monkey
 def test_get_ehf_status_returns_complete_payload(monkeypatch):
     engine = EHFFrequencyEngine()
     engine.analyze_biometrics(BioMetrics())
-    monkeypatch.setattr(engine.circadian, "get_circadian_phase", lambda: CircadianPhase.MORNING_PEAK)
+    monkeypatch.setattr(
+        engine.circadian,
+        "get_circadian_phase",
+        lambda *args, **kwargs: CircadianPhase.MORNING_PEAK,
+    )
 
     status = engine.get_ehf_status()
 
