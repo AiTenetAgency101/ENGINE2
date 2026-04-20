@@ -4,7 +4,6 @@
 
 import numpy as np
 from scipy.linalg import eig
-import sympy as sp
 
 class KOnePerfectSystem:
     """
@@ -25,7 +24,7 @@ class KOnePerfectSystem:
         A = np.ones((7, 7))
         
         # Calculate eigenvalues
-        eigenvalues, eigenvectors = eig(A)
+        eigenvalues, _ = eig(A)
         
         # All eigenvalues should equal 1.0
         eigenvalues_at_1 = np.allclose(eigenvalues, 1.0)
