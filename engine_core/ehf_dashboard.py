@@ -10,128 +10,165 @@ import json
 from engine_core.ehf_frequency import EHFFrequencyEngine, BioMetrics
 from engine_core.ehf_tron_alignment import EHFTRONAlignment, AdaptiveUIOptimization
 
+
 class EHFDashboardAPI:
     """EHF Performance Dashboard - REST API"""
-    
+
     def __init__(self, ehf_engine: EHFFrequencyEngine = None):
         self.ehf_engine = ehf_engine or EHFFrequencyEngine()
         self.alignment = EHFTRONAlignment(ehf_engine=self.ehf_engine)
         self.ui_optimizer = AdaptiveUIOptimization(self.ehf_engine)
-        
+
         self.app = Flask(__name__)
         CORS(self.app)
         self._register_routes()
 
     def _register_routes(self):
         """Register API endpoints"""
-        
-        @self.app.route('/api/ehf/health', methods=['GET'])
-        def health():
-            return jsonify({'status': 'healthy', 'service': 'EHF'}), 200
 
-        @self.app.route('/api/ehf/status', methods=['GET'])
+        @self.app.route("/api/ehf/health", methods=["GET"])
+        def health():
+            return jsonify({"status": "healthy", "service": "EHF"}), 200
+
+        @self.app.route("/api/ehf/status", methods=["GET"])
         def ehf_status():
             """Get complete EHF status"""
             return jsonify(self.ehf_engine.get_ehf_status()), 200
 
-        @self.app.route('/api/ehf/performance', methods=['GET'])
+        @self.app.route("/api/ehf/performance", methods=["GET"])
         def performance():
             """Get performance metrics"""
             analysis = self.ehf_engine.analyze_biometrics()
-            return jsonify({
-                'timestamp': datetime.now().isoformat(),
-                'analysis': analysis,
-                'metrics': self.ehf_engine.current_metrics.to_dict(),
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "timestamp": datetime.now().isoformat(),
+                        "analysis": analysis,
+                        "metrics": self.ehf_engine.current_metrics.to_dict(),
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/ehf/biomarkers', methods=['GET', 'POST'])
+        @self.app.route("/api/ehf/biomarkers", methods=["GET", "POST"])
         def biomarkers():
             """Get or update biomarkers"""
-            if request.method == 'POST':
+            if request.method == "POST":
                 data = request.json
                 metrics = BioMetrics(
-                    heart_rate=data.get('heart_rate', 60),
-                    heart_rate_variability=data.get('hrv', 50),
-                    stress_score=data.get('stress', 30),
-                    energy_level=data.get('energy', 80),
-                    sleep_quality=data.get('sleep_quality', 85),
-                    cortisol_level=data.get('cortisol', 50),
-                    glucose_level=data.get('glucose', 100),
+                    heart_rate=data.get("heart_rate", 60),
+                    heart_rate_variability=data.get("hrv", 50),
+                    stress_score=data.get("stress", 30),
+                    energy_level=data.get("energy", 80),
+                    sleep_quality=data.get("sleep_quality", 85),
+                    cortisol_level=data.get("cortisol", 50),
+                    glucose_level=data.get("glucose", 100),
                 )
                 self.ehf_engine.current_metrics = metrics
-                return jsonify({'updated': True, 'metrics': metrics.to_dict()}), 200
-            
-            return jsonify({
-                'timestamp': datetime.now().isoformat(),
-                'biomarkers': self.ehf_engine.current_metrics.to_dict(),
-            }), 200
+                return jsonify({"updated": True, "metrics": metrics.to_dict()}), 200
 
-        @self.app.route('/api/ehf/circadian', methods=['GET'])
+            return (
+                jsonify(
+                    {
+                        "timestamp": datetime.now().isoformat(),
+                        "biomarkers": self.ehf_engine.current_metrics.to_dict(),
+                    }
+                ),
+                200,
+            )
+
+        @self.app.route("/api/ehf/circadian", methods=["GET"])
         def circadian():
             """Get circadian phase and recommendations"""
             phase = self.ehf_engine.circadian.get_circadian_phase()
-            return jsonify({
-                'current_phase': phase.value,
-                'cortisol_expected': round(self.ehf_engine.circadian.get_cortisol_level(), 1),
-                'melatonin_expected': round(self.ehf_engine.circadian.get_melatonin_level(), 1),
-                'sleep_window': self.ehf_engine.circadian.get_optimal_sleep_time(),
-                'recommendations': self.ehf_engine.get_recommendations(),
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "current_phase": phase.value,
+                        "cortisol_expected": round(
+                            self.ehf_engine.circadian.get_cortisol_level(), 1
+                        ),
+                        "melatonin_expected": round(
+                            self.ehf_engine.circadian.get_melatonin_level(), 1
+                        ),
+                        "sleep_window": self.ehf_engine.circadian.get_optimal_sleep_time(),
+                        "recommendations": self.ehf_engine.get_recommendations(),
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/ehf/cognitive-state', methods=['GET'])
+        @self.app.route("/api/ehf/cognitive-state", methods=["GET"])
         def cognitive_state():
             """Get optimal cognitive state"""
             state = self.ehf_engine.get_cognitive_state()
             frequency = self.ehf_engine.get_optimal_frequency(state)
-            return jsonify({
-                'cognitive_state': state.value,
-                'optimal_frequency': f"{frequency} Hz",
-                'frequency_band': self._get_frequency_band(frequency),
-                'brain_wave_activity': self._get_brain_waves(state),
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "cognitive_state": state.value,
+                        "optimal_frequency": f"{frequency} Hz",
+                        "frequency_band": self._get_frequency_band(frequency),
+                        "brain_wave_activity": self._get_brain_waves(state),
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/ehf/recommendations', methods=['GET'])
+        @self.app.route("/api/ehf/recommendations", methods=["GET"])
         def recommendations():
             """Get personalized recommendations"""
-            return jsonify({
-                'timestamp': datetime.now().isoformat(),
-                'recommendations': self.ehf_engine.get_recommendations(),
-                'priority': self._prioritize_recommendations(self.ehf_engine.get_recommendations()),
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "timestamp": datetime.now().isoformat(),
+                        "recommendations": self.ehf_engine.get_recommendations(),
+                        "priority": self._prioritize_recommendations(
+                            self.ehf_engine.get_recommendations()
+                        ),
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/ehf/alignment', methods=['GET'])
+        @self.app.route("/api/ehf/alignment", methods=["GET"])
         def alignment():
             """Get EHF-TRON alignment status"""
             metrics = self.ehf_engine.current_metrics
             alignment_result = {
-                'alignment_score': self.alignment.alignment_score,
-                'synchronization': self.alignment.synchronization_accuracy,
-                'decision_window': self.alignment.get_optimal_decision_window(),
-                'readiness': self.alignment.get_system_readiness(),
+                "alignment_score": self.alignment.alignment_score,
+                "synchronization": self.alignment.synchronization_accuracy,
+                "decision_window": self.alignment.get_optimal_decision_window(),
+                "readiness": self.alignment.get_system_readiness(),
             }
             return jsonify(alignment_result), 200
 
-        @self.app.route('/api/ehf/ui-complexity', methods=['GET'])
+        @self.app.route("/api/ehf/ui-complexity", methods=["GET"])
         def ui_complexity():
             """Get optimal UI complexity"""
             return jsonify(self.ui_optimizer.get_optimal_ui_complexity()), 200
 
-        @self.app.route('/api/ehf/focus-mode', methods=['GET'])
+        @self.app.route("/api/ehf/focus-mode", methods=["GET"])
         def focus_mode():
             """Get focus mode settings"""
             return jsonify(self.ui_optimizer.get_focus_mode_settings()), 200
 
-        @self.app.route('/api/ehf/dashboard', methods=['GET'])
+        @self.app.route("/api/ehf/dashboard", methods=["GET"])
         def dashboard():
             """Get complete dashboard data"""
-            return jsonify({
-                'timestamp': datetime.now().isoformat(),
-                'performance': self.ehf_engine.analyze_biometrics(),
-                'status': self.ehf_engine.get_ehf_status(),
-                'recommendations': self.ehf_engine.get_recommendations(),
-                'readiness': self.alignment.get_system_readiness(),
-                'ui_config': self.ui_optimizer.get_optimal_ui_complexity(),
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "timestamp": datetime.now().isoformat(),
+                        "performance": self.ehf_engine.analyze_biometrics(),
+                        "status": self.ehf_engine.get_ehf_status(),
+                        "recommendations": self.ehf_engine.get_recommendations(),
+                        "readiness": self.alignment.get_system_readiness(),
+                        "ui_config": self.ui_optimizer.get_optimal_ui_complexity(),
+                    }
+                ),
+                200,
+            )
 
     def _get_frequency_band(self, frequency: float) -> str:
         """Get frequency band description"""
@@ -145,53 +182,53 @@ class EHFDashboardAPI:
             return "Beta (12-30 Hz) - Analytical, problem-solving"
         else:
             return "Gamma (30+ Hz) - Peak focus, insight"
-    
+
     def _get_brain_waves(self, state) -> Dict:
         """Get brain wave characteristics"""
         waves = {
-            'delta': 0,
-            'theta': 0,
-            'alpha': 0,
-            'beta': 0,
-            'gamma': 0,
+            "delta": 0,
+            "theta": 0,
+            "alpha": 0,
+            "beta": 0,
+            "gamma": 0,
         }
-        
+
         state_waves = {
-            'peak_focus': {'beta': 60, 'alpha': 30, 'gamma': 10},
-            'deep_work': {'theta': 70, 'alpha': 20, 'delta': 10},
-            'creative': {'beta': 50, 'alpha': 30, 'gamma': 20},
-            'recovery': {'delta': 60, 'theta': 30, 'alpha': 10},
-            'relaxed': {'alpha': 80, 'beta': 15, 'theta': 5},
-            'sleep': {'delta': 60, 'theta': 30, 'alpha': 10},
+            "peak_focus": {"beta": 60, "alpha": 30, "gamma": 10},
+            "deep_work": {"theta": 70, "alpha": 20, "delta": 10},
+            "creative": {"beta": 50, "alpha": 30, "gamma": 20},
+            "recovery": {"delta": 60, "theta": 30, "alpha": 10},
+            "relaxed": {"alpha": 80, "beta": 15, "theta": 5},
+            "sleep": {"delta": 60, "theta": 30, "alpha": 10},
         }
-        
-        state_key = state.value.lower().replace('_', '_')
+
+        state_key = state.value.lower().replace("_", "_")
         for key, val in state_waves.get(state_key, {}).items():
             waves[key] = val
-        
+
         return waves
-    
+
     def _prioritize_recommendations(self, recs: list) -> list:
         """Prioritize recommendations by importance"""
         priority_order = {
-            '🛏️': 1,    # Sleep
-            '💧': 2,    # Hydration
-            '🧘': 3,    # Stress management
-            '⚡': 4,    # Energy
-            '☀️': 5,    # Light exposure
-            '🍎': 6,    # Nutrition
-            '🎯': 7,    # Focus
+            "🛏️": 1,  # Sleep
+            "💧": 2,  # Hydration
+            "🧘": 3,  # Stress management
+            "⚡": 4,  # Energy
+            "☀️": 5,  # Light exposure
+            "🍎": 6,  # Nutrition
+            "🎯": 7,  # Focus
         }
-        
+
         def get_priority(rec):
             for symbol, priority in priority_order.items():
                 if rec.startswith(symbol):
                     return priority
             return 99
-        
+
         return sorted(recs, key=get_priority)
 
-    def run(self, host='0.0.0.0', port=9001, debug=False):
+    def run(self, host="0.0.0.0", port=9001, debug=False):
         """Run the EHF dashboard API"""
         print(f"\n[EHF] Efficient Human Frequency Dashboard")
         print(f"[EHF] Listening on http://{host}:{port}")
@@ -208,7 +245,7 @@ class EHFDashboardAPI:
         print(f"  GET /api/ehf/focus-mode          - Focus mode settings")
         print(f"  GET /api/ehf/dashboard           - Complete dashboard")
         print(f"\n")
-        
+
         self.app.run(host=host, port=port, debug=debug)
 
 
@@ -432,4 +469,4 @@ EHF_DASHBOARD_HTML = """
 
 if __name__ == "__main__":
     dashboard = EHFDashboardAPI()
-    dashboard.run(host='0.0.0.0', port=9001)
+    dashboard.run(host="0.0.0.0", port=9001)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import os
 
-os.environ['KAGGLE_USERNAME'] = 'backupsonbackupsrobby-cyber'
-os.environ['KAGGLE_KEY'] = 'KGAT_bb4030a949969eca4009e86b404ea4cb'
+os.environ["KAGGLE_USERNAME"] = "backupsonbackupsrobby-cyber"
+os.environ["KAGGLE_KEY"] = "KGAT_bb4030a949969eca4009e86b404ea4cb"
 
 from kaggle.api.kaggle_api_extended import KaggleApi
 

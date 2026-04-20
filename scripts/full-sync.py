@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 
+
 def run_module(name: str, script: str) -> bool:
     """Run a module and return success status"""
     print("\n" + "═" * 70)
@@ -17,9 +18,10 @@ def run_module(name: str, script: str) -> bool:
     time.sleep(1)  # Brief pause between modules
     return result.returncode == 0
 
+
 def main():
     """Complete ENGINE system synchronization"""
-    
+
     print("\n")
     print("╔" + "═" * 68 + "╗")
     print("║" + " " * 68 + "║")
@@ -30,47 +32,44 @@ def main():
     print("║" + "  + 5G Global Network Coverage".center(68) + "║")
     print("║" + " " * 68 + "║")
     print("╚" + "═" * 68 + "╝")
-    
+
     results = {}
-    
+
     # Phase 1: XYO
     results["xyo"] = run_module(
-        "1 - XYO Three Invariants (位置 時間 身分)",
-        "engine_core/xyo_invariants.py"
+        "1 - XYO Three Invariants (位置 時間 身分)", "engine_core/xyo_invariants.py"
     )
-    
+
     # Phase 2: 250GHz RFID/WiFi
     results["thz"] = run_module(
-        "2 - 250GHz RFID/WiFi Terahertz Interlock",
-        "engine_core/thz_rfid_interlock.py"
+        "2 - 250GHz RFID/WiFi Terahertz Interlock", "engine_core/thz_rfid_interlock.py"
     )
-    
+
     # Phase 3: 5G Global Network
     results["5g"] = run_module(
-        "3 - 5G Global Network Integration",
-        "engine_core/global_5g_network.py"
+        "3 - 5G Global Network Integration", "engine_core/global_5g_network.py"
     )
-    
+
     # Summary
     print("\n" + "═" * 70)
     print("SYNCHRONIZATION SUMMARY")
     print("═" * 70)
     print()
-    
+
     systems = [
         ("XYO Three Invariants", results["xyo"]),
         ("250GHz RFID/WiFi Interlock", results["thz"]),
         ("5G Global Network", results["5g"]),
     ]
-    
+
     all_passed = all(status for _, status in systems)
-    
+
     for name, status in systems:
         status_str = "✓ PASSED" if status else "✗ FAILED"
         print(f"{name:<35} {status_str}")
-    
+
     print()
-    
+
     if all_passed:
         print("╔════════════════════════════════════════════════════════════╗")
         print("║                                                            ║")
@@ -88,6 +87,7 @@ def main():
         print("║  SYNCHRONIZATION INCOMPLETE - Check failed modules        ║")
         print("╚════════════════════════════════════════════════════════════╝")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

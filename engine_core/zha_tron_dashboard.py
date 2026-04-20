@@ -8,211 +8,275 @@ from flask_cors import CORS
 from datetime import datetime
 import json
 
+
 class ZHATRONDashboardAPI:
     """REST API for ZHA + TRON orchestration"""
-    
+
     def __init__(self, orchestrator):
         self.orchestrator = orchestrator
         self.app = Flask(__name__)
         CORS(self.app)
-        
+
         # Register routes
         self._register_routes()
 
     def _register_routes(self):
         """Register API endpoints"""
-        
-        @self.app.route('/api/health', methods=['GET'])
+
+        @self.app.route("/api/health", methods=["GET"])
         def health():
             """Health check endpoint"""
-            return jsonify({
-                'status': 'healthy',
-                'timestamp': datetime.now().isoformat(),
-                'version': '1.0.0',
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "status": "healthy",
+                        "timestamp": datetime.now().isoformat(),
+                        "version": "1.0.0",
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/status', methods=['GET'])
+        @self.app.route("/api/status", methods=["GET"])
         def status():
             """Get complete system status"""
             return jsonify(self.orchestrator.get_orchestration_status()), 200
 
-        @self.app.route('/api/tron/status', methods=['GET'])
+        @self.app.route("/api/tron/status", methods=["GET"])
         def tron_status():
             """Get TRON grid status"""
             return jsonify(self.orchestrator.tron_engine.get_grid_status()), 200
 
-        @self.app.route('/api/zha/status', methods=['GET'])
+        @self.app.route("/api/zha/status", methods=["GET"])
         def zha_status():
             """Get ZHA integration status"""
             return jsonify(self.orchestrator.zha_integration.get_zha_status()), 200
 
-        @self.app.route('/api/zha/devices', methods=['GET'])
+        @self.app.route("/api/zha/devices", methods=["GET"])
         def zha_devices():
             """List all ZHA devices"""
             devices = {
                 device_id: device.to_dict()
                 for device_id, device in self.orchestrator.zha_integration.devices.items()
             }
-            return jsonify({
-                'total': len(devices),
-                'devices': devices,
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "total": len(devices),
+                        "devices": devices,
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/zha/devices/<device_id>/state', methods=['GET'])
+        @self.app.route("/api/zha/devices/<device_id>/state", methods=["GET"])
         def get_device_state(device_id):
             """Get specific device state"""
             device = self.orchestrator.zha_integration.devices.get(device_id)
             if not device:
-                return jsonify({'error': 'Device not found'}), 404
-            
-            return jsonify({
-                'device_id': device_id,
-                'state': device.to_dict(),
-            }), 200
+                return jsonify({"error": "Device not found"}), 404
 
-        @self.app.route('/api/zha/devices/<device_id>/control', methods=['POST'])
+            return (
+                jsonify(
+                    {
+                        "device_id": device_id,
+                        "state": device.to_dict(),
+                    }
+                ),
+                200,
+            )
+
+        @self.app.route("/api/zha/devices/<device_id>/control", methods=["POST"])
         def control_device(device_id):
             """Control a device"""
             data = request.json
-            command = data.get('command')
-            
+            command = data.get("command")
+
             # Map command to state (simplified)
             from engine_core.zha_integration import ZHAState
-            state_map = {'on': ZHAState.ON, 'off': ZHAState.OFF}
+
+            state_map = {"on": ZHAState.ON, "off": ZHAState.OFF}
             state = state_map.get(command)
-            
+
             if not state:
-                return jsonify({'error': 'Invalid command'}), 400
-            
+                return jsonify({"error": "Invalid command"}), 400
+
             # Note: This would be async in production
             # For now, just update the device
             device = self.orchestrator.zha_integration.devices.get(device_id)
             if not device:
-                return jsonify({'error': 'Device not found'}), 404
-            
-            device.state = state
-            
-            return jsonify({
-                'device_id': device_id,
-                'command': command,
-                'success': True,
-            }), 200
+                return jsonify({"error": "Device not found"}), 404
 
-        @self.app.route('/api/zha/groups', methods=['GET'])
+            device.state = state
+
+            return (
+                jsonify(
+                    {
+                        "device_id": device_id,
+                        "command": command,
+                        "success": True,
+                    }
+                ),
+                200,
+            )
+
+        @self.app.route("/api/zha/groups", methods=["GET"])
         def get_groups():
             """List device groups"""
             groups = {
                 group_name: list(device_ids)
                 for group_name, device_ids in self.orchestrator.zha_integration.device_groups.items()
             }
-            return jsonify({
-                'total': len(groups),
-                'groups': groups,
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "total": len(groups),
+                        "groups": groups,
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/zha/groups/<group_name>/control', methods=['POST'])
+        @self.app.route("/api/zha/groups/<group_name>/control", methods=["POST"])
         def control_group(group_name):
             """Control device group"""
             data = request.json
-            command = data.get('command')
-            
+            command = data.get("command")
+
             # In production, this would be async
             if group_name not in self.orchestrator.zha_integration.device_groups:
-                return jsonify({'error': 'Group not found'}), 404
-            
-            group_devices = self.orchestrator.zha_integration.device_groups[group_name]
-            
-            return jsonify({
-                'group': group_name,
-                'command': command,
-                'devices_targeted': len(group_devices),
-                'success': True,
-            }), 200
+                return jsonify({"error": "Group not found"}), 404
 
-        @self.app.route('/api/scenes', methods=['GET'])
+            group_devices = self.orchestrator.zha_integration.device_groups[group_name]
+
+            return (
+                jsonify(
+                    {
+                        "group": group_name,
+                        "command": command,
+                        "devices_targeted": len(group_devices),
+                        "success": True,
+                    }
+                ),
+                200,
+            )
+
+        @self.app.route("/api/scenes", methods=["GET"])
         def get_scenes():
             """List available scenes"""
             scenes = list(self.orchestrator.active_scenes.keys())
-            return jsonify({
-                'total': len(scenes),
-                'scenes': scenes,
-                'current_scene': self.orchestrator.current_scene,
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "total": len(scenes),
+                        "scenes": scenes,
+                        "current_scene": self.orchestrator.current_scene,
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/scenes/<scene_name>/activate', methods=['POST'])
+        @self.app.route("/api/scenes/<scene_name>/activate", methods=["POST"])
         def activate_scene(scene_name):
             """Activate a scene"""
             if scene_name not in self.orchestrator.active_scenes:
-                return jsonify({'error': 'Scene not found'}), 404
-            
+                return jsonify({"error": "Scene not found"}), 404
+
             # In production, this would be async
             actions = self.orchestrator.active_scenes[scene_name]
-            
-            return jsonify({
-                'scene': scene_name,
-                'actions': len(actions),
-                'activated': True,
-                'timestamp': datetime.now().isoformat(),
-            }), 200
 
-        @self.app.route('/api/automation/rules', methods=['GET'])
+            return (
+                jsonify(
+                    {
+                        "scene": scene_name,
+                        "actions": len(actions),
+                        "activated": True,
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                ),
+                200,
+            )
+
+        @self.app.route("/api/automation/rules", methods=["GET"])
         def get_rules():
             """List automation rules"""
-            if not hasattr(self.orchestrator, 'automation_engine'):
-                return jsonify({'total': 0, 'rules': []}), 200
-            
+            if not hasattr(self.orchestrator, "automation_engine"):
+                return jsonify({"total": 0, "rules": []}), 200
+
             rules = {
                 rule_id: {
-                    'name': rule.name,
-                    'enabled': rule.enabled,
-                    'executions': rule.execution_count,
-                    'triggers': len(rule.triggers),
-                    'actions': len(rule.actions),
+                    "name": rule.name,
+                    "enabled": rule.enabled,
+                    "executions": rule.execution_count,
+                    "triggers": len(rule.triggers),
+                    "actions": len(rule.actions),
                 }
                 for rule_id, rule in self.orchestrator.automation_engine.rules.items()
             }
-            return jsonify({
-                'total': len(rules),
-                'rules': rules,
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "total": len(rules),
+                        "rules": rules,
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/metrics', methods=['GET'])
+        @self.app.route("/api/metrics", methods=["GET"])
         def metrics():
             """Get system metrics"""
-            return jsonify({
-                'timestamp': datetime.now().isoformat(),
-                'tron_cycles': self.orchestrator.metrics['total_cycles'],
-                'device_changes': self.orchestrator.metrics['device_changes'],
-                'total_devices': self.orchestrator.metrics['total_devices'],
-                'total_automations': self.orchestrator.metrics['total_automations'],
-                'energy_balance': self.orchestrator.tron_engine.energy_balance,
-                'sync_accuracy': self.orchestrator.tron_engine.sync_accuracy,
-                'grid_health': self.orchestrator.tron_engine.grid_health,
-            }), 200
+            return (
+                jsonify(
+                    {
+                        "timestamp": datetime.now().isoformat(),
+                        "tron_cycles": self.orchestrator.metrics["total_cycles"],
+                        "device_changes": self.orchestrator.metrics["device_changes"],
+                        "total_devices": self.orchestrator.metrics["total_devices"],
+                        "total_automations": self.orchestrator.metrics[
+                            "total_automations"
+                        ],
+                        "energy_balance": self.orchestrator.tron_engine.energy_balance,
+                        "sync_accuracy": self.orchestrator.tron_engine.sync_accuracy,
+                        "grid_health": self.orchestrator.tron_engine.grid_health,
+                    }
+                ),
+                200,
+            )
 
-        @self.app.route('/api/history/scenes', methods=['GET'])
+        @self.app.route("/api/history/scenes", methods=["GET"])
         def scene_history():
             """Get scene execution history"""
-            limit = request.args.get('limit', 50, type=int)
+            limit = request.args.get("limit", 50, type=int)
             history = self.orchestrator.scene_history[-limit:]
-            
-            return jsonify({
-                'total': len(self.orchestrator.scene_history),
-                'recent': history,
-            }), 200
 
-        @self.app.route('/api/history/state-changes', methods=['GET'])
+            return (
+                jsonify(
+                    {
+                        "total": len(self.orchestrator.scene_history),
+                        "recent": history,
+                    }
+                ),
+                200,
+            )
+
+        @self.app.route("/api/history/state-changes", methods=["GET"])
         def state_history():
             """Get device state change history"""
-            limit = request.args.get('limit', 100, type=int)
+            limit = request.args.get("limit", 100, type=int)
             history = self.orchestrator.zha_integration.state_history[-limit:]
-            
-            return jsonify({
-                'total': len(self.orchestrator.zha_integration.state_history),
-                'recent': history,
-            }), 200
 
-    def run(self, host='0.0.0.0', port=9000, debug=False):
+            return (
+                jsonify(
+                    {
+                        "total": len(self.orchestrator.zha_integration.state_history),
+                        "recent": history,
+                    }
+                ),
+                200,
+            )
+
+    def run(self, host="0.0.0.0", port=9000, debug=False):
         """Run the dashboard API"""
         print(f"\n[DASHBOARD] Starting ZHA + TRON Dashboard API")
         print(f"[DASHBOARD] Listening on http://{host}:{port}")
@@ -230,7 +294,7 @@ class ZHATRONDashboardAPI:
         print(f"  GET  /api/history/scenes     - Scene history")
         print(f"  GET  /api/history/state-changes - State change history")
         print(f"\n")
-        
+
         self.app.run(host=host, port=port, debug=debug)
 
 
@@ -449,10 +513,10 @@ DASHBOARD_HTML = """
 # Example usage
 if __name__ == "__main__":
     from engine_core.zha_tron_orchestrator import ZHATRONOrchestrator
-    
+
     # Create orchestrator
     orchestrator = ZHATRONOrchestrator()
-    
+
     # Create and run dashboard
     dashboard = ZHATRONDashboardAPI(orchestrator)
-    dashboard.run(host='0.0.0.0', port=9000, debug=False)
+    dashboard.run(host="0.0.0.0", port=9000, debug=False)

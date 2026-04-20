@@ -16,21 +16,25 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class MCPTool:
     name: str
     description: str
     inputSchema: Dict[str, Any]
 
+
 class EngineManagerMCP:
     """MCP Server for Engine Management"""
-    
+
     def __init__(self):
         self.docker_socket = os.getenv("DOCKER_SOCKET", "/var/run/docker.sock")
-        self.kaggle_username = os.getenv("KAGGLE_USERNAME", "backupsonbackupsrobby-cyber")
+        self.kaggle_username = os.getenv(
+            "KAGGLE_USERNAME", "backupsonbackupsrobby-cyber"
+        )
         self.kaggle_key = os.getenv("KAGGLE_KEY", "")
         self.containers = ["engine-365-days", "ultimate-engine", "tenetaiagency-101"]
-        
+
     def get_tools(self) -> List[Dict[str, Any]]:
         """Return list of available tools"""
         return [
@@ -43,10 +47,10 @@ class EngineManagerMCP:
                         "container": {
                             "type": "string",
                             "description": "Specific container name (optional, default: all)",
-                            "enum": self.containers + ["all"]
+                            "enum": self.containers + ["all"],
                         }
-                    }
-                }
+                    },
+                },
             },
             {
                 "name": "engine_logs",
@@ -57,21 +61,21 @@ class EngineManagerMCP:
                         "container": {
                             "type": "string",
                             "description": "Container name",
-                            "enum": self.containers
+                            "enum": self.containers,
                         },
                         "tail": {
                             "type": "integer",
                             "description": "Number of log lines to retrieve",
-                            "default": 100
+                            "default": 100,
                         },
                         "since": {
                             "type": "string",
                             "description": "Show logs since (e.g., '5m', '1h')",
-                            "default": "10m"
-                        }
+                            "default": "10m",
+                        },
                     },
-                    "required": ["container"]
-                }
+                    "required": ["container"],
+                },
             },
             {
                 "name": "engine_restart",
@@ -82,11 +86,11 @@ class EngineManagerMCP:
                         "container": {
                             "type": "string",
                             "description": "Container name",
-                            "enum": self.containers
+                            "enum": self.containers,
                         }
                     },
-                    "required": ["container"]
-                }
+                    "required": ["container"],
+                },
             },
             {
                 "name": "engine_stats",
@@ -97,10 +101,10 @@ class EngineManagerMCP:
                         "container": {
                             "type": "string",
                             "description": "Specific container name (optional)",
-                            "enum": self.containers + ["all"]
+                            "enum": self.containers + ["all"],
                         }
-                    }
-                }
+                    },
+                },
             },
             {
                 "name": "kaggle_list_competitions",
@@ -111,10 +115,10 @@ class EngineManagerMCP:
                         "limit": {
                             "type": "integer",
                             "description": "Max competitions to list",
-                            "default": 20
+                            "default": 20,
                         }
-                    }
-                }
+                    },
+                },
             },
             {
                 "name": "kaggle_submit",
@@ -124,20 +128,20 @@ class EngineManagerMCP:
                     "properties": {
                         "competition": {
                             "type": "string",
-                            "description": "Competition reference ID"
+                            "description": "Competition reference ID",
                         },
                         "engine": {
                             "type": "string",
                             "description": "Engine to use for predictions",
-                            "enum": self.containers
+                            "enum": self.containers,
                         },
                         "message": {
                             "type": "string",
-                            "description": "Submission message"
-                        }
+                            "description": "Submission message",
+                        },
                     },
-                    "required": ["competition", "engine"]
-                }
+                    "required": ["competition", "engine"],
+                },
             },
             {
                 "name": "docker_compose_up",
@@ -148,10 +152,10 @@ class EngineManagerMCP:
                         "service": {
                             "type": "string",
                             "description": "Specific service to start (optional, default: all)",
-                            "enum": self.containers + ["kaggle-submission", "all"]
+                            "enum": self.containers + ["kaggle-submission", "all"],
                         }
-                    }
-                }
+                    },
+                },
             },
             {
                 "name": "docker_compose_down",
@@ -162,10 +166,10 @@ class EngineManagerMCP:
                         "remove_volumes": {
                             "type": "boolean",
                             "description": "Remove volumes when stopping",
-                            "default": False
+                            "default": False,
                         }
-                    }
-                }
+                    },
+                },
             },
             {
                 "name": "k8s_deploy",
@@ -176,10 +180,10 @@ class EngineManagerMCP:
                         "namespace": {
                             "type": "string",
                             "description": "Kubernetes namespace",
-                            "default": "default"
+                            "default": "default",
                         }
-                    }
-                }
+                    },
+                },
             },
             {
                 "name": "k8s_status",
@@ -190,10 +194,10 @@ class EngineManagerMCP:
                         "namespace": {
                             "type": "string",
                             "description": "Kubernetes namespace",
-                            "default": "default"
+                            "default": "default",
                         }
-                    }
-                }
+                    },
+                },
             },
             {
                 "name": "audit_trail",
@@ -204,34 +208,28 @@ class EngineManagerMCP:
                         "container": {
                             "type": "string",
                             "description": "Container to get audit from",
-                            "enum": self.containers + ["all"]
+                            "enum": self.containers + ["all"],
                         },
                         "limit": {
                             "type": "integer",
                             "description": "Number of records to retrieve",
-                            "default": 1000
-                        }
-                    }
-                }
+                            "default": 1000,
+                        },
+                    },
+                },
             },
             {
                 "name": "consensus_check",
                 "description": "Check Byzantine consensus status across 3 engines",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {}
-                }
+                "inputSchema": {"type": "object", "properties": {}},
             },
             {
                 "name": "cycle_progress",
                 "description": "Get 365-day cycle progress and completion percentage",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {}
-                }
-            }
+                "inputSchema": {"type": "object", "properties": {}},
+            },
         ]
-    
+
     def execute_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a tool and return result"""
         try:
@@ -265,7 +263,7 @@ class EngineManagerMCP:
                 return {"error": f"Unknown tool: {tool_name}"}
         except Exception as e:
             return {"error": str(e)}
-    
+
     def _run_docker_command(self, cmd: List[str]) -> str:
         """Execute docker command"""
         try:
@@ -273,51 +271,50 @@ class EngineManagerMCP:
             return result.stdout + result.stderr
         except Exception as e:
             return f"Error: {str(e)}"
-    
+
     def _engine_status(self, params: Dict) -> Dict[str, Any]:
         container = params.get("container", "all")
         if container == "all":
             containers = self.containers
         else:
             containers = [container]
-        
+
         results = []
         for c in containers:
             cmd = ["docker", "inspect", c]
             output = self._run_docker_command(cmd)
-            results.append({
-                "container": c,
-                "status": output if output else "Not found"
-            })
-        
+            results.append(
+                {"container": c, "status": output if output else "Not found"}
+            )
+
         return {"engines": results, "timestamp": datetime.now().isoformat()}
-    
+
     def _engine_logs(self, params: Dict) -> Dict[str, Any]:
         container = params.get("container")
         tail = params.get("tail", 100)
         since = params.get("since", "10m")
-        
+
         cmd = ["docker", "logs", "--tail", str(tail), f"--since={since}", container]
         output = self._run_docker_command(cmd)
-        
+
         return {
             "container": container,
             "logs": output,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     def _engine_restart(self, params: Dict) -> Dict[str, Any]:
         container = params.get("container")
         cmd = ["docker", "restart", container]
         output = self._run_docker_command(cmd)
-        
+
         return {
             "container": container,
             "action": "restart",
             "result": output,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     def _engine_stats(self, params: Dict) -> Dict[str, Any]:
         container = params.get("container", "all")
         if container == "all":
@@ -326,10 +323,10 @@ class EngineManagerMCP:
         else:
             containers = [container]
             cmd = ["docker", "stats", "--no-stream", container]
-        
+
         output = self._run_docker_command(cmd)
         return {"stats": output, "timestamp": datetime.now().isoformat()}
-    
+
     def _kaggle_list(self, params: Dict) -> Dict[str, Any]:
         limit = params.get("limit", 20)
         # In production, call actual Kaggle API
@@ -337,41 +334,49 @@ class EngineManagerMCP:
             "message": "Kaggle competitions list",
             "limit": limit,
             "status": "API call would execute here",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     def _kaggle_submit(self, params: Dict) -> Dict[str, Any]:
         competition = params.get("competition")
         engine = params.get("engine")
         message = params.get("message", "")
-        
+
         # In production, generate predictions from engine and submit
         return {
             "competition": competition,
             "engine": engine,
             "message": message,
             "status": "Submission queued",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     def _docker_compose_up(self, params: Dict) -> Dict[str, Any]:
         service = params.get("service", "all")
         cmd = ["docker-compose", "-f", "docker-compose-full-stack.yml", "up", "-d"]
         if service != "all":
             cmd.append(service)
-        
+
         output = self._run_docker_command(cmd)
-        return {"action": "compose up", "result": output, "timestamp": datetime.now().isoformat()}
-    
+        return {
+            "action": "compose up",
+            "result": output,
+            "timestamp": datetime.now().isoformat(),
+        }
+
     def _docker_compose_down(self, params: Dict) -> Dict[str, Any]:
         remove_volumes = params.get("remove_volumes", False)
         cmd = ["docker-compose", "-f", "docker-compose-full-stack.yml", "down"]
         if remove_volumes:
             cmd.append("-v")
-        
+
         output = self._run_docker_command(cmd)
-        return {"action": "compose down", "result": output, "timestamp": datetime.now().isoformat()}
-    
+        return {
+            "action": "compose down",
+            "result": output,
+            "timestamp": datetime.now().isoformat(),
+        }
+
     def _k8s_deploy(self, params: Dict) -> Dict[str, Any]:
         namespace = params.get("namespace", "default")
         # In production, run deploy-k8s.sh or call kubectl directly
@@ -379,31 +384,31 @@ class EngineManagerMCP:
             "action": "k8s deploy",
             "namespace": namespace,
             "status": "Deployment initiated",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     def _k8s_status(self, params: Dict) -> Dict[str, Any]:
         namespace = params.get("namespace", "default")
         cmd = ["kubectl", "get", "pods", "-n", namespace, "-o", "json"]
         output = self._run_docker_command(cmd)
-        
+
         return {
             "namespace": namespace,
             "pods": output,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     def _audit_trail(self, params: Dict) -> Dict[str, Any]:
         container = params.get("container", "all")
         limit = params.get("limit", 1000)
-        
+
         return {
             "container": container,
             "limit": limit,
             "audit_records": "Would retrieve SHA3-512 hash-linked audit trail",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     def _consensus_check(self, params: Dict) -> Dict[str, Any]:
         return {
             "consensus_status": "8/12 validators aligned (PASSED)",
@@ -411,35 +416,37 @@ class EngineManagerMCP:
             "engines": {
                 "engine-365-days": "CONSENSUS",
                 "ultimate-engine": "CONSENSUS",
-                "tenetaiagency-101": "CONSENSUS"
+                "tenetaiagency-101": "CONSENSUS",
             },
             "k_value": 1.00,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     def _cycle_progress(self, params: Dict) -> Dict[str, Any]:
         # Calculate progress (in real scenario, pull from engine)
         cycles_completed = 9070000  # From session summary
         cycles_per_day = 7200  # 1/7200 = ~12 seconds per cycle
         total_cycles = 7200 * 365
         progress_percent = (cycles_completed / total_cycles) * 100
-        
+
         return {
             "cycles_completed": cycles_completed,
             "total_cycles": total_cycles,
             "progress_percent": progress_percent,
             "days_completed": cycles_completed / cycles_per_day,
             "days_remaining": 365 - (cycles_completed / cycles_per_day),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
+
 
 def main():
     """Main entry point for MCP server"""
     mcp = EngineManagerMCP()
-    
+
     # Print tools as JSON for MCP protocol
     tools = mcp.get_tools()
     print(json.dumps({"tools": tools}, indent=2))
+
 
 if __name__ == "__main__":
     main()
