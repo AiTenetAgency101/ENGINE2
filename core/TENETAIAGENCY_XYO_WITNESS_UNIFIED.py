@@ -171,7 +171,7 @@ class SymPyMathematicalProof:
             "stability": "ABSOLUTE",
         }
 
-    def d5_tesseract_proof(self):
+    def tesseract_5d_proof(self):
         """5D tesseract equation"""
 
         # 5D point: (x, y, z, w, t)
@@ -303,7 +303,7 @@ class TenetaiagencyUnifiedCrossInvariant:
                     self.sympy_math.cross_invariant_equation()
                 ),
                 "coherence_function": self.sympy_math.coherence_function(),
-                "5d_tesseract": self.sympy_math.d5_tesseract_proof(),
+                "5d_tesseract": self.sympy_math.tesseract_5d_proof(),
             },
             "verification": self.matlab.matlab_symbolic_computation(),
             "coherence": {

@@ -313,10 +313,7 @@ def main():
     print("Global 5G Network Nodes:")
     print("─" * 70)
     for node in network.nodes:
-        print(
-            f"  {node.node_id:<15} {node.location_name:<25} "
-            f"({node.latitude:7.4f}, {node.longitude:8.4f})"
-        )
+        print(f"  {node.node_id:<15} {node.location_name:<25}")
 
     print()
     print("Network Health:")
