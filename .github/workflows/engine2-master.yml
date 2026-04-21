@@ -12,7 +12,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: chmod +x ./check_health.sh
       - run: ./check_health.sh
       - run: ls -R .
@@ -26,7 +26,7 @@ jobs:
       actions: read
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: github/codeql-action/init@v4
         with:
           languages: python
@@ -37,7 +37,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -51,7 +51,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     needs: lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -64,7 +64,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     needs: test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: docker/login-action@v4
         with:
           registry: ghcr.io
@@ -80,7 +80,7 @@ jobs:
     needs: build_container
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: echo "Deploying ENGINE2..."
       - run: echo "Deployment complete."
 
@@ -90,7 +90,7 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: echo "Running PR validation..."
       - run: echo "PR checks complete."
 
@@ -99,7 +99,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: echo "=== REPO HEALTH SUITE ==="
       - run: df -h
       - run: find . -name "*.py" | wc -l
@@ -111,7 +111,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: echo "=== ENGINE2 ARCHITECTURE MAP ==="
       - run: tree -a .
 
