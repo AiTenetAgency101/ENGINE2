@@ -6,12 +6,9 @@ Terahertz-band communication for ultra-precise container location
 
 import json
 import hashlib
-import time
 from datetime import datetime
-from typing import Dict, List, Tuple
-import struct
-import sympy as sp
-from sympy import symbols, solve, simplify
+from typing import Dict, Tuple
+from sympy import symbols
 
 # Terahertz frequency band (250 GHz) specifications
 THz_FREQUENCY = 250e9  # 250 GHz in Hz

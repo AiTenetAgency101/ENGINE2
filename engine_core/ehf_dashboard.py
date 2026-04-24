@@ -3,10 +3,12 @@ EHF Performance Dashboard API
 Real-time human performance optimization with TRON synchronization
 """
 
+from datetime import datetime
+from typing import Dict
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from datetime import datetime
-import json
+
 from engine_core.ehf_frequency import EHFFrequencyEngine, BioMetrics
 from engine_core.ehf_tron_alignment import EHFTRONAlignment, AdaptiveUIOptimization
 
@@ -102,7 +104,6 @@ class EHFDashboardAPI:
         @self.app.route('/api/ehf/alignment', methods=['GET'])
         def alignment():
             """Get EHF-TRON alignment status"""
-            metrics = self.ehf_engine.current_metrics
             alignment_result = {
                 'alignment_score': self.alignment.alignment_score,
                 'synchronization': self.alignment.synchronization_accuracy,
