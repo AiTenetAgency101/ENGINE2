@@ -1,0 +1,30 @@
+# Build stage
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+COPY main.py runner.py healthcheck.py ./
+COPY engines engines/
+
+# Production stage
+FROM python:3.11-slim
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser
+
+WORKDIR /app
+
+# Copy application code from builder
+COPY --from=builder --chown=appuser:appuser /app .
+
+# Create volume directories with correct permissions
+RUN mkdir -p logs state && chown -R appuser:appuser logs state
+
+# Set user to non-root
+USER appuser
+
+# Health check (cycle-based)
+HEALTHCHECK --start-period=5s --retries=2 \
+    CMD python healthcheck.py || exit 1
+
+# Run application
+CMD ["python", "main.py"]

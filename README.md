@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ENGINE - Quantum Lantern Protocol
 
 **Enterprise-Grade Security + Satellite-Verified State + AI Agent Factory**
@@ -40,10 +41,22 @@ cat .satellite-state/ledger.jsonl | jq .
 
 # Containers
 docker ps
+=======
+# ENGINE2: Multi-Engine Orchestration System
+
+ENGINE2 is a containerized multi-engine orchestration platform. It runs six specialized engines (ULTIMATE, TENET, WORKER365, TRON, ZHA, XYO) in coordinated cycles.
+
+## Quick Start
+
+```bash
+docker build -t engine-all:latest ENGINE-ALL/
+docker run --rm engine-all:latest
+>>>>>>> ceab0c1 (Align surfaces into unified synchronised state)
 ```
 
 ## Architecture
 
+<<<<<<< HEAD
 ### Credential Protection (8 Layers)
 ```
 Local Files
@@ -238,3 +251,91 @@ All documentation included:
 **Your infrastructure is sovereign, zero-wobble, and cryptographically proven.**
 
 This is revolutionary.
+=======
+- **ULTIMATE-ENGINE** - Sovereign cycle decision engine
+- **TENETAIAGENCY-101** - Doctrine-validated firewall
+- **ENGINE-365-DAYS** - Daily execution cycles
+- **TRON** - Kaprekar routine computation (4-digit number transformation)
+- **ZHA** - Rule gate validation engine
+- **XYO** - SHA256 anchor & timestamp proof engine
+
+## Engine Output
+
+Each engine returns:
+```json
+{
+  "engine": "ENGINE-NAME",
+  "decision|firewall|cycle|history|rule_gate|anchor": "value",
+  "input": {"payload": "values"}
+}
+```
+
+## Cycle-Based Health Checks
+
+Container health is determined by cycle completion, not fixed time intervals. After all engines complete successfully, health status is written to `/tmp/engine_cycle_health`.
+
+## Docker Deployment
+
+```bash
+# Build
+docker build -t engine-all:latest ENGINE-ALL/
+
+# Run single cycle
+docker run --rm engine-all:latest
+
+# Run as daemon with health checks
+docker run -d --name engine-all --health-interval=30s engine-all:latest
+```
+
+## Environment
+
+- **Python**: 3.11-slim
+- **User**: appuser (UID 1000, non-root)
+- **Working Dir**: /app
+- **Entrypoint**: `python main.py`
+
+## Health Check
+
+```bash
+docker inspect engine-all --format='{{.State.Health.Status}}'
+```
+
+Returns: `healthy` after cycle completes, `unhealthy` on failure.
+
+## Project Structure
+
+```
+ENGINE2/
+├── ENGINE-ALL/           # Main application
+│   ├── engines/          # Engine implementations
+│   │   ├── ultimate/
+│   │   ├── tenet/
+│   │   ├── worker365/
+│   │   ├── tron/
+│   │   ├── zha/
+│   │   └── xyo/
+│   ├── main.py           # Cycle orchestrator
+│   ├── runner.py         # Engine dispatcher
+│   ├── healthcheck.py    # Cycle health monitor
+│   ├── Dockerfile        # Multi-stage build
+│   └── .dockerignore
+├── CONFIG/               # Configuration files (reserved)
+├── DOCS/                 # Documentation
+├── LOGS/                 # Cycle logs
+├── STATE/                # Cycle state persistence
+└── SCRIPTS/              # Utility scripts
+```
+
+## Development
+
+Modify engine logic in `ENGINE-ALL/engines/*/[engine-name].py`. Rebuild with:
+
+```bash
+docker build --no-cache -t engine-all:latest ENGINE-ALL/
+```
+
+## Requirements
+
+- Docker 20.10+
+- Docker Compose 1.29+ (optional, for orchestration)
+>>>>>>> ceab0c1 (Align surfaces into unified synchronised state)

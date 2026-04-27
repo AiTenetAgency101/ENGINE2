@@ -1,0 +1,136 @@
+services:
+  # REFERENCE ENGINES
+  engine-365-days:
+    image: python:3.11-slim
+    container_name: engine-365-days
+    restart: unless-stopped
+    networks:
+      - engine-network
+    healthcheck:
+      test: ["CMD", "test", "-f", "/logs/metrics.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - ./LOGS/engine-365:/logs
+      - ./engine365.py:/app/engine365.py
+    working_dir: /app
+    command: python3 engine365.py
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  ultimate-engine:
+    image: python:3.11-slim
+    container_name: ultimate-engine
+    restart: unless-stopped
+    networks:
+      - engine-network
+    healthcheck:
+      test: ["CMD", "test", "-f", "/logs/ultimate_sovereign_metrics.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - ./LOGS/ultimate:/logs
+      - ./ultimate.py:/app/ultimate.py
+    working_dir: /app
+    command: python3 ultimate.py
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  tenetaiagency-101:
+    image: python:3.11-slim
+    container_name: tenetaiagency-101
+    restart: unless-stopped
+    networks:
+      - engine-network
+    healthcheck:
+      test: ["CMD", "test", "-f", "/logs/metrics.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - ./LOGS/tenet:/logs
+      - ./tenet.py:/app/tenet.py
+    working_dir: /app
+    command: python3 tenet.py
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+  # PUBLIC API - robdoe.com
+  engine-all:
+    build:
+      context: ./ENGINE-ALL
+      dockerfile: Dockerfile
+    container_name: engine-all
+    restart: unless-stopped
+    networks:
+      - engine-network
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "/app/healthcheck.py"]
+      start_period: 5s
+      retries: 2
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PUBLIC_DOMAIN=robdoe.com
+      - PRIVATE_DOMAIN=robertdoe.pw
+    volumes:
+      - ./LOGS:/app/logs
+      - ./STATE:/app/state
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    depends_on:
+      - engine-365-days
+      - ultimate-engine
+      - tenetaiagency-101
+
+  # PRIVATE API - robertdoe.pw
+  engine2-ops:
+    build:
+      context: ./ENGINE2-OPS
+      dockerfile: Dockerfile
+    container_name: engine2-ops
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PUBLIC_DOMAIN=robdoe.com
+      - PRIVATE_DOMAIN=robertdoe.pw
+    volumes:
+      - ./LOGS:/app/logs
+      - ./STATE:/app/state
+    networks:
+      - engine-network
+    ports:
+      - "127.0.0.1:8001:8001"
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    entrypoint: ["python", "main.py"]
+    command: ["tron_cycle", "3029"]
+    depends_on:
+      - engine-365-days
+      - ultimate-engine
+      - tenetaiagency-101
+
+networks:
+  engine-network:
+    driver: bridge

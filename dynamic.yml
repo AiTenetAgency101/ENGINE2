@@ -1,0 +1,57 @@
+http:
+  routers:
+    engine-all-public:
+      rule: "Host(`robdoe.com`) || Host(`www.robdoe.com`)"
+      service: engine-all
+      entryPoints:
+        - web
+      middlewares:
+        - public-headers
+
+    engine2-ops-private:
+      rule: "Host(`robertdoe.pw`) || Host(`*.robertdoe.pw`)"
+      service: engine2-ops
+      entryPoints:
+        - web
+      middlewares:
+        - private-headers
+
+    dashboard:
+      rule: "Host(`admin.robdoe.com`)"
+      service: api@internal
+      entryPoints:
+        - web
+
+  services:
+    engine-all:
+      loadBalancer:
+        servers:
+          - url: "http://engine-all:8000"
+        passHostHeader: true
+
+    engine2-ops:
+      loadBalancer:
+        servers:
+          - url: "http://engine2-ops:8001"
+        passHostHeader: true
+
+  middlewares:
+    public-headers:
+      headers:
+        customRequestHeaders:
+          X-Domain-Type: "public"
+          X-Domain: "robdoe.com"
+        customResponseHeaders:
+          X-Frame-Options: "SAMEORIGIN"
+          X-Content-Type-Options: "nosniff"
+          Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+
+    private-headers:
+      headers:
+        customRequestHeaders:
+          X-Domain-Type: "private"
+          X-Domain: "robertdoe.pw"
+        customResponseHeaders:
+          X-Frame-Options: "DENY"
+          X-Content-Type-Options: "nosniff"
+          Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"

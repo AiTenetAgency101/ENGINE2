@@ -1,0 +1,12 @@
+{
+  "anchor_type": "time-clock",
+  "witness_timestamp": "2026-04-23T07:53:50.5144990+10:00",
+  "system_clock_at_anchor": "2026-04-27T23:43:00+10:00",
+  "cycle": 0,
+  "roothash": "f8c1d5b3a9f2e8c1d5b3a9f2e8c1d5b3a9f2e8c1d5b3a9f2e8c1d5b3a9f2e8",
+  "meta": {
+    "description": "Time-clock anchor of cycle-0 witness to local system time.",
+    "location": "Sydney/AEST",
+    "source": "tenetaiagency-101"
+  }
+}

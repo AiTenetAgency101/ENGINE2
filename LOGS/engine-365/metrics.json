@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-04-06T09:45:41.296136",
+  "uptime_seconds": 32710.35751223564,
+  "uptime_days": 0.37859210083606065,
+  "cycles_completed": 12104208,
+  "decisions_evaluated": 100000,
+  "decisions_allowed": 29000,
+  "rejection_rate": 0.71,
+  "consensus_rate": 1.0,
+  "validator_health": [
+    {
+      "name": "Circle",
+      "checks": 12104208,
+      "failures": 0,
+      "reliability": 1.0
+    },
+    {
+      "name": "Monotonic",
+      "checks": 12104208,
+      "failures": 0,
+      "reliability": 1.0
+    },
+    {
+      "name": "Range",
+      "checks": 12104208,
+      "failures": 0,
+      "reliability": 1.0
+    }
+  ],
+  "grid_passed": 3510223,
+  "grid_rejected": 8593985
+}
