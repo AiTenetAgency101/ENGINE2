@@ -1,0 +1,1 @@
+﻿Write-Host "DIAGNOSTICS OK"

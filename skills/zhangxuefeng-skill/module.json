@@ -1,0 +1,34 @@
+﻿{
+  "module": "zhangxuefeng",
+  "type": "cognitive.operator",
+  "version": "1.0.0",
+  "status": "active",
+  "invocation": "operator.zhang",
+  "entrypoints": {
+    "classify": "operator.zhang.classify",
+    "evaluate": "operator.zhang.evaluate",
+    "answer": "operator.zhang.answer"
+  },
+  "capabilities": [
+    "question-classification",
+    "data-driven-evaluation",
+    "education-decision-logic",
+    "career-path-analysis",
+    "ai-impact-assessment",
+    "middle-distribution-modelling",
+    "high-certainty-output"
+  ],
+  "dependencies": [
+    "module.header.md",
+    "module.routing.md",
+    "module.index.md",
+    "WORKFLOW.agentic.md",
+    "MODELS.mindset.md",
+    "EXPRESSION.dna.md",
+    "PROTOCOL.md"
+  ],
+  "folders": [
+    "EXAMPLES",
+    "REFERENCES"
+  ]
+}
