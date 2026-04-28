@@ -2,7 +2,7 @@
 # Requirements for container health synchronization
 
 # Core ENGINE
-pydantic>=2.0.0
+pydantic>=2.13.3
 python-dotenv>=1.0.0
 
 # XYO Integration
