@@ -40,7 +40,7 @@
   "time_clock_anchor": {
     "anchor_type": "time-clock",
     "witness_timestamp": "2026-04-23T07:53:50.5144990+10:00",
-    "system_clock_at_anchor": "2026-04-27T23:43:00+10:00",
+    "system_clock_at_anchor": "2026-04-29T12:52:51+10:00",
     "cycle": 0,
     "roothash": "c2935f7ada2c1fb990a399d1c66df1f8c9e15f4d3e0172ed133b6e7354d825d5",
     "meta": {
